@@ -555,15 +555,16 @@ class QQBot:
                 DEBUG('第%d次请求“%s”时出现“%s”, html=%s',
                       nCE+nTO+nUE+nDE, url, errorInfo, repr(html))
             else:
+                if nTO == 20 and url.startswith('http://s.web2.qq.com/api/get_friend_uin2'):
+                    # 针对某个好友获取不到的情况，先返回一个空值，以确保成功登陆
+                    # 防止因个别好友无法获得触发SystemExit,如果是因为其他原因则退出
+                    return {'account': -1}
+                
                 CRITICAL('第%d次请求“%s”时出现“%s”，终止 QQBot',
                          nCE+nTO+nUE+nDE, url, errorInfo)
-
-                if url.startswith('http://s.web2.qq.com/api/get_friend_uin2'):
-                    return {'account': -1} 
-                    # 针对某个好友获取不到的情况，先返回一个空值，以确保成功登陆
-                else:
-                    raise RequestError  # (SystemExit) 
-                    # 防止因个别好友无法获得触发SystemExit,如果是因为其他原因则退出
+                
+                raise RequestError  # (SystemExit) 
+                    
 
     # class attribute `helpInfo` will be printed at the start of `Run` method
     helpInfo = '帮助命令："-help"'
